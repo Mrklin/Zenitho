@@ -143,9 +143,8 @@ const extraLinks = [
 ];
 
 onMounted(async () => {
-    if (store.products.length === 0) {
-        await store.fetchProducts(1, 6, 'New');
-    }
+    
+    await store.fetchProducts(1, 6, 'New');
 });
 
 </script>
