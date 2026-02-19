@@ -68,7 +68,7 @@
                       :label="link.badge"
                     />
                     <router-link
-                      :to="link.to"
+                      :to="link.route"
                       class="hover:underline text-text hover:text-dark justify-end items-start h-10 gap-2"
                     >
                       {{ link.label }}
