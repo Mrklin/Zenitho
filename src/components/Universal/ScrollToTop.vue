@@ -3,7 +3,7 @@
     <button
       v-show="isVisible"
       @click="scrollToTop"
-      class="fixed bottom-8 cursor-pointer right-8 z-99 bg-dark text-white w-12 h-12 rounded-full flex items-center justify-center shadow-lg hover:bg-gray-800 transition-all duration-300 active:scale-90"
+      class="fixed bottom-8 cursor-pointer right-15 md:right-8 z-99 bg-dark text-white w-12 h-12 rounded-full flex items-center justify-center shadow-lg hover:bg-gray-800 transition-all duration-300 active:scale-90"
       aria-label="Scroll to top"
     >
       <Icon icon="ri:arrow-up-line" width="24" height="24" />

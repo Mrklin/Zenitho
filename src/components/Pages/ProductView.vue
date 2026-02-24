@@ -1,175 +1,102 @@
 <template>
   <div>
     <div><Toaster position="top-center" :reverseOrder="false"/></div>
-    <section class="bg-sec p-8 w-full">
-      <div class="max-w-350 flex justify-start items-center ml-10 text-sm">
+    <section class="bg-sec p-4 md:p-8 w-full">
+      <div class="max-w-7xl mx-auto text-sm">
         <div class="flex flex-col items-start">
-          <span class="text-5xl text-dark mb-4">Products</span>
+          <span class="text-3xl md:text-5xl text-dark mb-2 md:mb-4 font-medium">Products</span>
           <span>Home / <span class="text-text">Products</span> </span>
         </div>
       </div>
     </section>
 
-    <section class="border-b px-8 w-full">
-      <div class="p-6 flex justify-between items-center">
-        <div class="flex items-center gap-4 p-2 rounded-lg w-fit">
+    <section class="border-b px-4 md:px-8 w-full bg-white sticky top-0 z-10">
+      <div class="py-4 md:p-6 flex flex-col md:flex-row justify-between items-center gap-4">
+        <div class="hidden md:flex items-center gap-4 p-2 rounded-lg w-fit bg-gray-50">
           <button
-            @click="cols = 4"
-            :class="{ 'text-dark shadow-sm bg-white': cols === 4 }"
-            class="p-2 rounded transition-all"
+           v-for="n in [4, 3, 2, 1]" :key="n"
+            @click="cols = n"
+            :class="[cols === n ? 'text-dark shadow-sm bg-white' : 'text-gray-400']"
+            class="p-2 rounded transition-all hover:text-dark"
           >
-            <Icon icon="ri:grid-fill" width="18" />
-          </button>
-
-          <button
-            @click="cols = 3"
-            :class="{ 'text-dark shadow-sm bg-white': cols === 3 }"
-            class="p-2 rounded transition-all text-gray-400"
-          >
-            <Icon icon="ri:layout-grid-fill" width="18" />
-          </button>
-
-          <button
-            @click="cols = 2"
-            :class="{ 'text-dark shadow-sm bg-white': cols === 2 }"
-            class="p-2 rounded transition-all text-gray-400"
-          >
-            <Icon icon="ri:layout-2-fill" width="18" />
-          </button>
-
-          <button
-            @click="cols = 1"
-            :class="{ 'text-dark shadow-sm bg-white': cols === 1 }"
-            class="p-2 rounded transition-all text-gray-400"
-          >
-            <Icon icon="ri:layout-top-fill" width="18" />
+            <Icon :icon="getIcon(n)" width="18" />
           </button>
         </div>
 
-        <div class="flex gap-4 items-center text-text">
-          <span>
-            Showing {{ store.pagination.from }} - {{ store.pagination.to }} of {{ store.pagination.total }} result
-            <select
-              @change="handleItemsPerPageChange"
-              class="bg-white outline-0 border border-gray-300 rounded-lg p-2"
-            >
+        <div class="flex flex-col sm:flex-row gap-4 items-center text-text text-xs md:text-sm w-full md:w-auto">
+          <div class="flex items-center gap-2 whitespace-nowrap">
+            <span>Show</span>
+            <select @change="handleItemsPerPageChange" class="bg-white border border-gray-300 rounded-md p-1 md:p-2 outline-none">
               <option v-for="num in numbs" :key="num.id" :value="num.id" :selected="num.id === 12">
                 {{ num.id }}
               </option>
             </select>
-            per page
-          </span>
-          <span>
-            Sort by:
-            <select class="bg-white outline-0 border border-gray-300 rounded-lg p-2">
-              <option v-for="sort in sorts" :key="sort.cat" :value="sort">
-                {{ sort.cat }}
-              </option>
+            <span>of {{ store.pagination.total }} results</span>
+          </div>
+
+          <div class="flex items-center gap-2 whitespace-nowrap">
+            <span>Sort:</span>
+            <select class="bg-white border border-gray-300 rounded-md p-1 md:p-2 outline-none w-full sm:w-auto">
+              <option v-for="sort in sorts" :key="sort.cat" :value="sort.cat">{{ sort.cat }}</option>
             </select>
-          </span>
+          </div>
         </div>
       </div>
     </section>
 
-    <section class="p-8 flex gap-2">
-      <div class="w-1/4">
-        <AccordionView />
-        <!-- <Disclosure v-slot="{open}">
-                    <DisclosureButton class="py-2 flex gap-3 items-center justify-between">
-                            <span class="text-3xl">Custom Menu</span> 
-                             <Icon icon="ri:arrow-down-s-line" width="18" 
-                             :class="open ? 'rotate-180 transform transition-transform duration-200 ease-in-out':''"  />
-                    </DisclosureButton>
-                    <DisclosurePanel as="ul" class="text-gray-500">
-                        <li>Home</li>
-                        <li>Shop</li>
-                        <Disclosure v-slot="{open}">
-                            <DisclosureButton class="flex justify-between items-center">
-                                <span>Catalog SALE</span>
-                                <Icon :icon="open ? 'ri:subtract-line' : 'ri:add-line'" width="20" 
-                                    class="transition-transform duration-200" />
-                            </DisclosureButton>
-                            <DisclosurePanel as="ul">
-                              <li>fast</li>
-                            </DisclosurePanel>
-                        </Disclosure>
+    <section class="p-4 md:p-8 flex flex-col lg:flex-row gap-8">
+      
+        <aside class="w-full lg:w-1/4">
+        <div class="lg:sticky lg:top-24">
+          <AccordionView />
+        </div>
+      </aside>
 
-                    </DisclosurePanel>
-                </Disclosure> -->
-      </div>
-
-      <div class="flex flex-col w-3/4">
-        <div
-          v-if="store.searchQuery"
-          class="mb-6 p-3 bg-gray-50 border-l-4 border-dark flex items-center justify-between"
-        >
+      <main class="flex flex-col w-full lg:w-3/4">
+        
+        <div v-if="store.searchQuery" class="mb-6 p-4 bg-gray-50 border-l-4 border-dark flex flex-wrap items-center justify-between gap-2">
           <p class="text-text">
-            Showing results for: <span class="font-bold text-dark">"{{ store.searchQuery }}"</span>
+            Results for: <span class="font-bold text-dark">"{{ store.searchQuery }}"</span>
           </p>
-            <!-- <p>Debug: Search Query is [{{ store.searchQuery }}]</p>
-            <p>Debug: Number of filtered items: {{ store.filterProducts.length }}</p> -->
-          <button
-            @click="store.searchQuery = ''"
-            class="text-red-500 hover:text-red-700 underline text-sm"
-          >
+          <button @click="store.searchQuery = ''" class="text-red-500 hover:underline text-sm font-medium">
             Clear Search
           </button>
         </div>
 
-        <div v-if="store.loading"
-          class="grid gap-8 transition-all duration-500"
-          :class="{
-            'grid-cols-4': cols === 4,
-            'grid-cols-3': cols === 3,
-            'grid-cols-2': cols === 2,
-            'grid-cols-1': cols === 1,
-          }"
+        <div 
+          class="grid gap-4 md:gap-8 transition-all duration-500"
+          :class="responsiveGridClasses"
         >
-          <ProductCardSkeleton  v-for="product in store.products" :key="product.id" />
+          <template v-if="store.loading">
+            <ProductCardSkeleton v-for="n in 8" :key="n" />
+          </template>
+          <template v-else>
+            <ProductCard v-for="product in store.products" :key="product.id" :product="product" />
+          </template>
         </div>
 
-        <div v-else
-          class="grid gap-8 transition-all duration-500"
-          :class="{
-            'grid-cols-4': cols === 4,
-            'grid-cols-3': cols === 3,
-            'grid-cols-2': cols === 2,
-            'grid-cols-1': cols === 1,
-          }"
-        >
-          <ProductCard  v-for="product in store.products" :key="product.id" :product="product" />
-        </div>
-
-        <div class="flex justify-center mt-10 gap-2">
-          <button
-            @click="currentPage--"
-            :disabled="currentPage === 1 || store.loading"
-            class="px-4 py-2 border cursor-pointer rounded disabled:opacity-30"
-          >
-            <Icon icon="ri:arrow-left-s-line" />
+        <div class="flex flex-wrap justify-center items-center mt-12 gap-2">
+          <button @click="currentPage--" :disabled="currentPage === 1 || store.loading"
+            class="p-2 border rounded-md disabled:opacity-20 hover:bg-gray-50 transition-colors">
+            <Icon icon="ri:arrow-left-s-line" width="20" />
           </button>
 
-          <div class="flex gap-1">
-            <button 
-              v-for="page in displayedPages" 
-              :key="page"
+          <div class="flex gap-1 overflow-x-auto">
+            <button v-for="page in displayedPages" :key="page"
               @click="currentPage = page"
-              :class="['w-10 h-10 border rounded transition-all duration-200 cursor-pointer', 
-                      currentPage === page ? 'bg-dark text-white' : 'hover:bg-gray-100']"
+              :class="[currentPage === page ? 'bg-dark text-white border-dark' : 'hover:bg-gray-50 border-gray-200']"
+              class="min-w-10 h-10 border rounded-md transition-all duration-200 text-sm font-medium"
             >
               {{ page }}
             </button>
           </div>
 
-          <button
-            @click="currentPage++"
-            :disabled="currentPage >= totalPages || store.loading"
-            class="px-4 py-2 border cursor-pointer rounded disabled:opacity-30"
-          >
-            <Icon icon="ri:arrow-right-s-line" />
+          <button @click="currentPage++" :disabled="currentPage >= totalPages || store.loading"
+            class="p-2 border rounded-md disabled:opacity-20 hover:bg-gray-50 transition-colors">
+            <Icon icon="ri:arrow-right-s-line" width="20" />
           </button>
         </div>
-      </div>
+      </main>
     </section>
   </div>
 </template>
@@ -275,8 +202,33 @@ const sorts = [
   { cat: 'Date, old to new' },
 ]
 
-onMounted(async () => {
+const getIcon = (n) => {
+  const icons = {
+    4: 'ri:grid-fill',
+    3: 'ri:layout-grid-fill',
+    2: 'ri:layout-2-fill',
+    1: 'ri:layout-top-fill'
+  }
+  return icons[n]
+};
 
+const responsiveGridClasses = computed(() => {
+  return {
+    // Mobile: Always 1 or 2 columns
+    'grid-cols-1 sm:grid-cols-2': true,
+    
+    // Tablet (md): Respect the 'cols' choice but cap it at 3
+    'md:grid-cols-2 lg:grid-cols-3': cols.value >= 3,
+    
+    // Desktop (lg+): Fully respect the choice
+    'lg:grid-cols-1': cols.value === 1,
+    'lg:grid-cols-2': cols.value === 2,
+    'lg:grid-cols-3': cols.value === 3,
+    'lg:grid-cols-4': cols.value === 4,
+  }
+})
+
+onMounted(async () => {
   await store.fetchProducts(currentPage.value, itemsPerPage.value)
 });
 

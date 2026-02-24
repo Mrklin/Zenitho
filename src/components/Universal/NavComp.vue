@@ -183,6 +183,10 @@
               <p class="text-[10px] text-gray-400 uppercase font-bold">Account</p>
               <p class="text-xs text-dark truncate">{{ user.userName }}</p>
           </div>
+          <router-link :to="{name:'account'}" class="w-full flex items-center gap-2 px-4 py-2 text-sm text-dark hover:bg-red-50 transition-colors">
+              <Icon icon="ri:user-line" width="18" />
+              My Account
+          </router-link>
           <button 
             @click="handleLogOut" 
             class="w-full flex items-center gap-2 px-4 py-2 text-sm text-red-500 hover:bg-red-50 transition-colors"
@@ -261,6 +265,7 @@
             <label class="text-text text-sm ml-2">I agree to the terms & conditions</label>
             </span>
             <button
+            @click.stop='checkout'
             :disabled="!isAgree"
             class="bg-dark text-white py-3 rounded hover:bg-gray-800 transition-colors mt-4 w-full disabled:opacity-50 disabled:cursor-not-allowed"
             >
@@ -462,6 +467,10 @@ const activeMenu = ref(null)
 
 const isMobileMenuOpen = ref(false)
 const mobileSubOpen = ref(null)
+
+const checkout = () =>{
+  router.push('/checkout')
+}
 
 const toggleMobileSub = (name) => {
   mobileSubOpen.value = mobileSubOpen.value === name ? null : name

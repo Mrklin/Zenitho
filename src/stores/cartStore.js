@@ -7,6 +7,8 @@ import { userStore } from './userStore'
 export const useCartStore = defineStore('cartStore', () => {
     const items = ref([])
 
+    const orderHistory = ref([])
+
     const count = computed(() => items.value.length)
 
     const cartItems = computed(() => items.value)
@@ -40,35 +42,6 @@ export const useCartStore = defineStore('cartStore', () => {
         loading.value = false
       }
     }
-
-    // const addToCart = async (product) => {
-    //     try {
-    //         const response = await api.post('/cart/add',{
-    //             product_id: product.id,
-    //             quantity:1 }
-    //         );
-
-    //         const serverData = response.data?.data || {};
-
-    //         const existingIndex = items.value.findIndex(i => i.id === product.id);
-
-    //         if (existingIndex !==-1) {
-    //            items.value[existingIndex].quantity++;
-    //            console.log(existingIndex);
-    //         } else {
-    //          items.value.push({
-    //             ...product,
-    //             cart_id: serverData.id || Date.now() ,
-    //             quantity: 1
-    //          });
-    //         }
-    //         toast.success("Item added to cart", {duration: 2000});
-
-    //     } catch (error) {
-    //         console.error("Validation Error:", error.response?.data);
-    //         toast.error("Failed to add item to cart");
-    //     }
-    // }
 
     const addToCart = async (product) => {
       const uStore = userStore()
@@ -175,11 +148,6 @@ export const useCartStore = defineStore('cartStore', () => {
       }
     }
 
-    //     toast.error("No more stock available");
-    //     return;
-    // } else {
-    //     items.value[index].number += 1;
-    // }
 
     const removeFromCart = async (product) => {
       const uStore = userStore()
@@ -200,8 +168,6 @@ export const useCartStore = defineStore('cartStore', () => {
         toast.success('Item removed locally')
       }
     }
-
-    // const decrementCart = (id) => {
     //     const item = items.value.find(item => item.id === id);
     //     // if (item && item.number > 1) {
     //     //     const index = items.value.findIndex(item => item.id === id);
@@ -251,9 +217,19 @@ export const useCartStore = defineStore('cartStore', () => {
       try {
         const response = await api.post('/orders/checkout', billing)
 
+        const newOrder = {
+          id: Date.now(),
+          date: new Date().toLocaleString(),
+          items: [...items],
+          total: items.value.reduce((acc, item) => acc + (item.price * item.quantity), 0)
+        }
+
+        orderHistory.value.unshift(newOrder)
+
         const data = response.data?.data || response.data
 
         if (data) {
+        items.value= []
           checkOutSuccess.value = true
           clearCart()
           return true
@@ -279,6 +255,8 @@ export const useCartStore = defineStore('cartStore', () => {
       itemTotal,
       cartTotal,
       checkOut,
+      checkOutSuccess,
+      orderHistory
     }
   },
   {

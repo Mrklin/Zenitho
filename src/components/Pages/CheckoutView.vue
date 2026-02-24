@@ -1,6 +1,6 @@
 <template>
   <div class="flex flex-col">
-    <div><Toaster position="top-center" :reverseOrder="false"/></div>
+    <div><Toaster position="top-center" :reverseOrder="false" /></div>
     <div class="flex w-full px-40 py-3 justify-between items-center border-b border-black/10">
       <router-link :to="{ name: 'dashboard' }" class="text-2xl font-medium"
         >Lezada - Multipurpose eCommerce Shopify Theme</router-link
@@ -43,7 +43,8 @@
         >
           <h2 class="text-xl font-semibold">Delivery</h2>
 
-          <span class="w-full flex items-center justify-between">
+          <BillingAddress @country-change="handleCountryChange" :display="display" />
+          <!-- <span class="w-full flex items-center justify-between">
             <input type="text" name="fName" id="" placeholder="First name" />
             <input type="text" name="lName" id="" placeholder="Last name" />
           </span>
@@ -65,7 +66,7 @@
           <span class="w-full flex items-center justify-between">
             <input type="text" name="fName" id="" placeholder="Postal code" />
             <input type="text" name="lName" id="" placeholder="City" />
-          </span>
+          </span> -->
 
           <span class="flex justify-start my-3 gap-3">
             <input type="checkbox" name="info" id="info" class="mr-2" />
@@ -80,7 +81,11 @@
               disabled
               class="bg-black/5 text-dark"
               type="text"
-              placeholder="Enter your shipping address to view available shipping methods."
+              :value="
+                selectedCountry
+                  ? `International shipping $${shippingFee.toFixed(2)}`
+                  : 'Enter your shipping address to view available shipping methods.'
+              "
             />
           </span>
         </span>
@@ -157,7 +162,9 @@
                         <Field
                           name="cardNumber"
                           type="text"
-                          inputmode="numeric" @keypress="onlyNumbers" placeholder="Card number"
+                          inputmode="numeric"
+                          @keypress="onlyNumbers"
+                          placeholder="Card number"
                           class="w-full p-3 pr-10 border rounded-md focus:outline-none focus:ring-1 focus:ring-black bg-white"
                           :class="{ 'border-red-500': errors.cardNumber }"
                         />
@@ -183,7 +190,11 @@
                         <div class="relative">
                           <Field
                             name="cardCvv"
-                            type="text" inputmode="numeric" @keypress="onlyNumbers" maxlength="4" placeholder="Security code"
+                            type="text"
+                            inputmode="numeric"
+                            @keypress="onlyNumbers"
+                            maxlength="4"
+                            placeholder="Security code"
                             class="w-full p-3 pr-10 bg-white border rounded-md focus:outline-none focus:ring-1 focus:ring-black"
                             :class="{ 'border-red-500': errors.cardCvv }"
                           />
@@ -228,9 +239,15 @@
                       </div>
 
                       <Transition name="expand">
-                        <div v-if="paymentMethod === 'card'" class="accordion-content pt-4 space-y-4">
+                        <div
+                          v-if="paymentMethod === 'card'"
+                          class="accordion-content pt-4 space-y-4"
+                        >
                           <h2 class="text-lg font-medium text-gray-900">Billing address</h2>
-                          <BillingAddress :countries="countries" :errors="errors" />
+                          <BillingAddress
+                            @country-change="handleCountryChange"
+                            :display="display"
+                          />
                         </div>
                       </Transition>
                     </div>
@@ -301,7 +318,10 @@
 
                       <Transition name="expand">
                         <div v-if="!codBillingSame" class="accordion-content pt-2">
-                          <BillingAddress :countries="countries" :errors="errors" />
+                          <BillingAddress
+                            @country-change="handleCountryChange"
+                            :display="display"
+                          />
                         </div>
                       </Transition>
                     </div>
@@ -349,173 +369,198 @@
 
         <span class="flex justify-between text-sm w-full my-2 text-dark">
           <p>Shipping</p>
-          <input disabled type="text" class="cursor-text" placeholder="Enter Shipping address" />
+          <p v-if="selectedCountry" class="font-medium">${{ shippingFee.toFixed(2) }}</p>
+          <p v-else class="text-gray-400 italic">Calculated at next step</p>
         </span>
 
         <span class="flex justify-between text-base font-semibold w-full my-4 text-dark">
           <p>Total</p>
-          <p>${{ store.cartTotal.toFixed(2) }}</p>
+          <p>${{ grandTotal.toFixed(2) }}</p>
         </span>
       </div>
     </div>
     <ModalPop v-if="showSuccessModal" :value="true" @close="showSuccessModal = null">
-        <div class="flex flex-col items-center justify-center w-full text-center p-6 sm:p-8 gap-5">
-        
-        <div class="w-20 h-20 bg-green-50 text-green-500 rounded-full flex items-center justify-center mb-2 animate-bounce-short">
-        <Icon icon="ri:checkbox-circle-fill" width="48" />
+      <div class="flex flex-col items-center justify-center w-full text-center p-6 sm:p-8 gap-5">
+        <div
+          class="w-20 h-20 bg-green-50 text-green-500 rounded-full flex items-center justify-center mb-2 animate-bounce-short"
+        >
+          <Icon icon="ri:checkbox-circle-fill" width="48" />
         </div>
 
         <div class="space-y-2">
-        <h2 class="text-2xl sm:text-3xl font-bold text-gray-900">Order Successful!</h2>
-        <p class="text-gray-500 text-sm sm:text-base max-w-70 mx-auto leading-relaxed">
+          <h2 class="text-2xl sm:text-3xl font-bold text-gray-900">Order Successful!</h2>
+          <p class="text-gray-500 text-sm sm:text-base max-w-70 mx-auto leading-relaxed">
             Thank you for your purchase. Your order has been confirmed and will be shipped soon.
-        </p>
+          </p>
         </div>
 
-        <button 
-        @click="continueShopping" 
-        class="w-full sm:w-auto min-w-50 mt-2 py-3.5 px-6 bg-black text-white text-sm font-semibold uppercase tracking-wide rounded hover:bg-gray-800 transition-all active:scale-[0.98] flex items-center justify-center gap-2"
+        <button
+          @click="continueShopping"
+          class="w-full sm:w-auto min-w-50 mt-2 py-3.5 px-6 bg-black text-white text-sm font-semibold uppercase tracking-wide rounded hover:bg-gray-800 transition-all active:scale-[0.98] flex items-center justify-center gap-2"
         >
-        <span>Continue Shopping</span>
-        <Icon icon="ri:arrow-right-line" />
+          <span>Continue Shopping</span>
+          <Icon icon="ri:arrow-right-line" />
         </button>
-
-        </div>
+      </div>
     </ModalPop>
   </div>
 </template>
 <script setup>
 import { useCartStore } from '@/stores/cartStore'
-import toast,{Toaster} from 'vue3-hot-toast';
-import { ref } from 'vue';
-import router from '@/router';
-import { Form, Field, ErrorMessage } from 'vee-validate';
-import * as yup from 'yup';
-import { Icon } from '@iconify/vue';
-import BillingAddress from '../Universal/BillingAddress.vue';
-import ModalPop from '../Universal/ModalPop.vue';
+import toast, { Toaster } from 'vue3-hot-toast'
+import { ref, computed } from 'vue'
+import router from '@/router'
+import { Form, Field, ErrorMessage } from 'vee-validate'
+import * as yup from 'yup'
+import { Icon } from '@iconify/vue'
+import BillingAddress from '../Universal/BillingAddress.vue'
+import ModalPop from '../Universal/ModalPop.vue'
 
 const store = useCartStore()
 
 // State
-const paymentMethod = ref('card');
-const cardBillingSame = ref(true);
-const codBillingSame = ref(true);
-const showSuccessModal = ref(false);
-
+const paymentMethod = ref('card')
+const cardBillingSame = ref(true)
+const codBillingSame = ref(true)
+const showSuccessModal = ref(false)
+const display = ref(false)
+const selectedCountry = ref('')
+const shippingFee = ref(0)
 
 // Mock Data
-const shippingAddress = "123 Shipping St"; 
-const countries = [
-  { code: 'US', name: 'United States' },
-  { code: 'GB', name: 'United Kingdom' },
-  { code: 'NG', name: 'Nigeria' },
-];
+const shippingAddress = '123 Shipping St'
 
+//   { code: 'US', name: 'United States' },
+//   { code: 'GB', name: 'United Kingdom' },
+//   { code: 'NG', name: 'Nigeria' },
+// ];
 
 // Helper: Restrict Input
 const onlyNumbers = (event) => {
-  const charCode = event.which ? event.which : event.keyCode;
+  const charCode = event.which ? event.which : event.keyCode
   if (charCode > 31 && (charCode < 48 || charCode > 57)) {
-    event.preventDefault();
+    event.preventDefault()
   }
-};
+}
+
+const handleCountryChange = (countryName) => {
+  selectedCountry.value = countryName
+  if (countryName) {
+    shippingFee.value = 20.0 // Set your flat rate here
+  } else {
+    shippingFee.value = 0
+  }
+}
+
+// Computed property for the final total
+const grandTotal = computed(() => {
+  return store.cartTotal + shippingFee.value
+})
 
 // Schema
 const schema = yup.object().shape({
   cardNumber: yup.string().when([], {
     is: () => paymentMethod.value === 'card',
-    then: (s) => s
-      .required('Card number is required')
-      .matches(/^[0-9]+$/, 'Must be only digits')
-      .min(13, 'Too short')
-      .max(19, 'Too long'),
+    then: (s) =>
+      s
+        .required('Card number is required')
+        .matches(/^[0-9]+$/, 'Must be only digits')
+        .min(13, 'Too short')
+        .max(19, 'Too long'),
   }),
   cardExpiry: yup.string().when([], {
     is: () => paymentMethod.value === 'card',
-    then: (s) => s
-      .required('Expiry is required')
-      .matches(
-        /^(0[1-2]|1[0-2])\/?([0-9]{2})$/,
-        'Must be a valid date (MM/YY)'
-      ),
+    then: (s) =>
+      s
+        .required('Expiry is required')
+        .matches(/^(0[1-2]|1[0-2])\/?([0-9]{2})$/, 'Must be a valid date (MM/YY)'),
   }),
   cardCvv: yup.string().when([], {
     is: () => paymentMethod.value === 'card',
-    then: (s) => s
-      .required('CVV is required')
-      .matches(/^[0-9]{3,4}$/, 'Must be 3 or 4 digits'),
+    then: (s) => s.required('CVV is required').matches(/^[0-9]{3,4}$/, 'Must be 3 or 4 digits'),
   }),
 
   cardName: yup.string().when([], {
     is: () => paymentMethod.value === 'card',
     then: (s) => s.required('Name is required'),
   }),
-  
+
   // Logic: Require billing fields if (Card AND !Same) OR (COD AND !Same)
-  billingAddress: yup.string().when([], { 
-    is: () => (paymentMethod.value === 'card' && !cardBillingSame.value) || (paymentMethod.value === 'cod' && !codBillingSame.value), 
-    then: (s) => s.required('Address is required') 
+  billingAddress: yup.string().when([], {
+    is: () =>
+      (paymentMethod.value === 'card' && !cardBillingSame.value) ||
+      (paymentMethod.value === 'cod' && !codBillingSame.value),
+    then: (s) => s.required('Address is required'),
   }),
-  billingCity: yup.string().when([], { 
-    is: () => (paymentMethod.value === 'card' && !cardBillingSame.value) || (paymentMethod.value === 'cod' && !codBillingSame.value), 
-    then: (s) => s.required('City is required') 
+  billingCity: yup.string().when([], {
+    is: () =>
+      (paymentMethod.value === 'card' && !cardBillingSame.value) ||
+      (paymentMethod.value === 'cod' && !codBillingSame.value),
+    then: (s) => s.required('City is required'),
   }),
-  billingZip: yup.string().when([], { 
-    is: () => (paymentMethod.value === 'card' && !cardBillingSame.value) || (paymentMethod.value === 'cod' && !codBillingSame.value), 
-    then: (s) => s.required('Zip is required') 
+  billingZip: yup.string().when([], {
+    is: () =>
+      (paymentMethod.value === 'card' && !cardBillingSame.value) ||
+      (paymentMethod.value === 'cod' && !codBillingSame.value),
+    then: (s) => s.required('Zip is required'),
   }),
-  billingCountry: yup.string().when([], { 
-    is: () => (paymentMethod.value === 'card' && !cardBillingSame.value) || (paymentMethod.value === 'cod' && !codBillingSame.value), 
-    then: (s) => s.required('Country is required') 
+  billingCountry: yup.string().when([], {
+    is: () =>
+      (paymentMethod.value === 'card' && !cardBillingSame.value) ||
+      (paymentMethod.value === 'cod' && !codBillingSame.value),
+    then: (s) => s.required('Country is required'),
   }),
-  billingFirstName: yup.string().when([], { 
-    is: () => (paymentMethod.value === 'card' && !cardBillingSame.value) || (paymentMethod.value === 'cod' && !codBillingSame.value), 
-    then: (s) => s.required('First Name is required') 
+  billingFirstName: yup.string().when([], {
+    is: () =>
+      (paymentMethod.value === 'card' && !cardBillingSame.value) ||
+      (paymentMethod.value === 'cod' && !codBillingSame.value),
+    then: (s) => s.required('First Name is required'),
   }),
-  billingLastName: yup.string().when([], { 
-    is: () => (paymentMethod.value === 'card' && !cardBillingSame.value) || (paymentMethod.value === 'cod' && !codBillingSame.value), 
-    then: (s) => s.required('Last Name is required') 
+  billingLastName: yup.string().when([], {
+    is: () =>
+      (paymentMethod.value === 'card' && !cardBillingSame.value) ||
+      (paymentMethod.value === 'cod' && !codBillingSame.value),
+    then: (s) => s.required('Last Name is required'),
   }),
-});
+})
 
 const onSubmit = async (values) => {
   try {
     // 1. Calculate Billing Address
-    const isSameAddress = paymentMethod.value === 'card' ? cardBillingSame.value : codBillingSame.value;
-    
-    let finalBillingAddress = isSameAddress ? shippingAddress : 
-      `${values.billingFirstName} ${values.billingLastName}, ${values.billingAddress}, ${values.billingCity}, ${values.billingZip}, ${values.billingCountry}`;
-      
-    if (!isSameAddress && values.billingApartment) finalBillingAddress += ` (Apt ${values.billingApartment})`;
+    const isSameAddress =
+      paymentMethod.value === 'card' ? cardBillingSame.value : codBillingSame.value
+
+    let finalBillingAddress = isSameAddress
+      ? shippingAddress
+      : `${values.billingFirstName} ${values.billingLastName}, ${values.billingAddress}, ${values.billingCity}, ${values.billingZip}, ${values.billingCountry}`
+
+    if (!isSameAddress && values.billingApartment)
+      finalBillingAddress += ` (Apt ${values.billingApartment})`
 
     // 2. Prepare Payload
     const payload = {
       payment_method: paymentMethod.value,
       shipping_address: shippingAddress,
-      billing_address: finalBillingAddress
+      billing_address: finalBillingAddress,
       // Note: Add card info here if your backend requires it, e.g., tokenized card data
-    };
+    }
 
     // 3. Fake Delay & Checkout
-    await new Promise(resolve => setTimeout(resolve, 500));
-    await store.checkOut(payload);
-    
-    // 4. Show Success Modal
-    showSuccessModal.value = true;
-    
+    await new Promise((resolve) => setTimeout(resolve, 500))
+    await store.checkOut(payload)
 
+    // 4. Show Success Modal
+    showSuccessModal.value = true
   } catch (error) {
-    toast.error(error.message || 'Checkout failed');
-    console.error("There was a problem checking out", error);
+    toast.error(error.message || 'Checkout failed')
+    console.error('There was a problem checking out', error)
   }
-};
+}
 
 const continueShopping = () => {
-  showSuccessModal.value = false;
-  router.push('/store'); // Redirect to home/shop
-};
-
+  showSuccessModal.value = false
+  router.push('/store') // Redirect to home/shop
+}
 </script>
 <style>
 /* Smooth accordion animation */
@@ -535,5 +580,4 @@ const continueShopping = () => {
   padding-bottom: 0;
   margin: 0;
 }
-
 </style>

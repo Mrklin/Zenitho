@@ -1,15 +1,13 @@
 <template >
     <div>
         <div><Toaster position="top-center" :reverseOrder="false"/></div>
-        <section class="bg-sec px-10 py-8 w-full">
-            <div class="max-w-350 flex justify-start items-center ml-10 text-sm">
-                
-                <div class="flex items-start">
-                    <span class="cursor-pointer"><router-link :to="{name: 'dashboard'}">Home</router-link> / 
-                         <span class="text-text">{{ product?.name }}</span> </span>
-                </div>
-            </div>
-        </section>
+        <section class="bg-sec p-4 md:p-8 w-full">
+      <div class="max-w-7xl mx-auto text-sm">
+        <div class="flex items-start">
+          <span>Home / <span class="text-text">{{product?.name}}</span> </span>
+        </div>
+      </div>
+    </section>
 
         <section class="mt-7 px-20">
 
@@ -354,8 +352,7 @@ onMounted(async () => {
         await store.getSingleProduct(props.id)
     } else{
         console.error('No ID found in props');   
-    }
-       
+    }  
 });
 
 </script>

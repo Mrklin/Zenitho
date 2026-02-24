@@ -25,6 +25,7 @@ export const userStore = defineStore("user", () => {
 
     const user = ref(null);
     const token = ref(null);
+    const addressBook = ref([])
     const isLoggedIn = ref(false);
 
     // const setToken = (authToken) => {
@@ -173,7 +174,22 @@ export const userStore = defineStore("user", () => {
 
   };
 
-    return { user, resetPassword, token, isLoggedIn, signupUser, loginUser, logoutUser, userName, setUser, clearUser };
+    const addAddress = (address) =>{
+        if(address.isDefault){
+            addressBook.value.forEach(a => a.isDefault = false);
+        }
+        addressBook.value.push({...address, id: Date.now()})
+    };
+
+    const deleteAddress = (id) =>{
+        addressBook.value = addressBook.value.filter(a => a.id !== id)
+    }
+
+    const defaultAddress = computed(() => 
+        addressBook.value.find(a => a.isDefault || addressBook.value[0])
+    )
+
+    return { user, resetPassword, token, isLoggedIn, addressBook, addAddress, deleteAddress, defaultAddress, signupUser, loginUser, logoutUser, userName, setUser, clearUser };
 
 
 },{

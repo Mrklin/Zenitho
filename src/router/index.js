@@ -2,6 +2,8 @@ import { createRouter, createWebHistory } from 'vue-router'
 // import AuthLayout from '@/Layouts/AuthLayout.vue'
 // import AppLayout from '@/Layouts/AppLayout.vue'
 import SignupView from '@/components/Auth/SignupView.vue'
+import AccountView from '@/components/Pages/AccountView.vue'
+import AddressView from '@/components/Pages/AddressView.vue'
 import LoginView from '@/components/Auth/LoginView.vue'
 import ResetView from '@/components/Auth/ResetView.vue'
 import DashBoardView from '@/components/Pages/DashBoardView.vue'
@@ -76,6 +78,18 @@ const router = createRouter({
           name:'cart',
           component : CartView,
           meta: {isPublic: true}
+        },
+        {
+          path:'account',
+          name: 'account',
+          component: AccountView,
+          meta: {requiresAuth:true}
+        },
+        {
+          path:'address',
+          name: 'address',
+          component: AddressView,
+          meta: {requiresAuth:true}
         },
         {path:'wishlist',
           name:'wishlist',
