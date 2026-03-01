@@ -9,9 +9,9 @@
       </div>
     </section>
 
-    <section v-if="store.count === 0" class="px-20 my-20">
+    <section v-if="store.count === 0" class="px-4 md:px-20 my-10 md:my-20">
       <div
-        class="w-full flex flex-col justify-center items-center py-6 shadow-lg text-fancy font-medium text-3xl"
+        class="w-full flex flex-col justify-center items-center py-12 shadow-sm border border-gray-100 rounded-lg text-fancy font-medium text-2xl md:text-3xl gap-6"
       >
         <div>Your cart is Empty</div>
         <router-link :to="{name:'store'}">
@@ -19,154 +19,142 @@
         </router-link>
       </div>
     </section>
-    <section v-else class="px-20 my-20">
+
+    <section v-else class="px-4 md:px-10 lg:px-20 my-10 md:my-20">
       <div class="flex flex-col gap-10 w-full">
-        <div class="w-full mb-10">
+        <div class="w-full">
           <div
-            class="grid grid-cols-8 text-center px-10 [&_div]:border [&_div]:border-black/10 [&_div]:py-2 [&_div]:px-4"
+            class="hidden md:grid grid-cols-8 text-center border-b border-black/10 font-semibold text-dark pb-4"
           >
-            <div class="col-span-3">Product</div>
+            <div class="col-span-3 text-left pl-10">Product</div>
             <div class="col-span-1">Price</div>
             <div class="col-span-2">Quantity</div>
             <div class="col-span-1">Total</div>
             <div class="col-span-1"></div>
           </div>
 
-          <div
-            v-for="product in store.items"
-            :key="product.id"
-            class="grid grid-cols-8 text-center px-10 [&_div]:border [&_div]:flex [&_div]:items-center [&_div]:border-black/10 [&_div]:py-2 [&_div]:px-4"
-          >
-            <div class="col-span-1 flex items-center gap-4">
-              <img :src="product?.image" alt="product image" class="w-20 h-20 object-contain" />
-            </div>
-            <div class="col-span-2">{{ product?.name }}</div>
-            <div class="col-span-1">${{ product?.price }}</div>
-            <div class="col-span-2 flex justify-center items-center gap-4">
-              <button
-                @click="store.updateCartQuantity(product.id, 'decrement')"
-                class="bg-red-500 text-white px-2 py-1 rounded"
-              >
-                -
-              </button>
-              <input
-                type="number"
-                v-model="product.quantity"
-                min="1"
-                class="w-12 text-center border border-dark rounded"
-              />
-              <button
-                @click="store.updateCartQuantity(product.id, 'increment')"
-                class="bg-green-500 text-white px-2 py-1 rounded cursor-pointer"
-              >
-                +
-              </button>
-            </div>
-            <div class="col-span-1">${{ Number(product?.price * product.quantity).toFixed(2) }}</div>
-            <div class="col-span-1">
-              <Icon
-                icon="mdi:delete"
-                class="text-2xl cursor-pointer mx-auto"
-                @click="store.removeFromCart(product)"
-              />
+          <div class="divide-y divide-gray-100">
+            <div
+              v-for="product in store.items"
+              :key="product.id"
+              class="grid grid-cols-1 md:grid-cols-8 py-6 items-center gap-4 md:gap-0 text-center md:text-center"
+            >
+              <div class="col-span-1 md:col-span-3 flex items-center gap-4 text-left">
+                <img :src="product?.image" alt="product" class="w-20 h-20 md:w-24 md:h-24 object-contain bg-gray-50 rounded" />
+                <div class="flex flex-col">
+                  <span class="font-medium text-dark md:text-lg">{{ product?.name }}</span>
+                  <span class="md:hidden text-text text-sm">${{ product?.price }}</span>
+                </div>
+              </div>
+
+              <div class="hidden md:block col-span-1 text-text">${{ product?.price }}</div>
+
+              <div class="col-span-1 md:col-span-2 flex justify-start md:justify-center items-center gap-4">
+                <span class="md:hidden text-sm font-medium mr-auto">Quantity:</span>
+                <div class="flex items-center border border-dark rounded overflow-hidden">
+                   <button @click="store.updateCartQuantity(product.id, 'decrement')"
+                    class="px-3 py-1 hover:bg-gray-100 transition-colors border-r border-dark">-</button>
+                  <input type="number" v-model="product.quantity" min="1"
+                    class="w-10 text-center outline-none bg-transparent" />
+                  <button @click="store.updateCartQuantity(product.id, 'increment')"
+                    class="px-3 py-1 hover:bg-gray-100 transition-colors border-l border-dark">+</button>
+                </div>
+              </div>
+
+              <div class="col-span-1 flex md:block justify-between items-center border-t md:border-none pt-4 md:pt-0">
+                <span class="md:hidden font-medium">Subtotal:</span>
+                <span class="font-semibold text-dark">${{ (product?.price * product.quantity).toFixed(2) }}</span>
+              </div>
+
+              <div class="col-span-1 text-right md:text-center">
+                <Icon icon="mdi:delete-outline"
+                  class="text-2xl cursor-pointer text-red-400 hover:text-red-600 inline-block"
+                  @click="store.removeFromCart(product)" />
+              </div>
             </div>
           </div>
 
-          <div class="flex gap-4 justify-end pb-10 w-full mb-10 border-b border-b-black/10">
-            <router-link
-              :to="{ name: 'store' }"
-              class="bg-dark text-white px-6 py-2 rounded mt-10 float-right hover:bg-black/70"
-            >
+          <div class="flex flex-col sm:flex-row gap-4 justify-between items-center py-10 border-t border-black/10">
+            <router-link :to="{ name: 'store' }"
+              class="w-full sm:w-auto text-center border border-dark px-8 py-3 rounded hover:bg-dark hover:text-white transition-all">
               Continue Shopping
             </router-link>
-            <button
-              @click="store.clearCart"
-              class="bg-dark text-white px-6 py-2 rounded mt-10 float-right cursor-pointer hover:bg-red-700"
-            >
-              Clear Cart
+            <button @click="store.clearCart"
+              class="w-full sm:w-auto text-center text-red-500 hover:text-red-700 font-medium">
+              Clear Shopping Cart
             </button>
           </div>
         </div>
 
-        <div class="flex justify-between w-full">
-          <div class="flex w-1/2 flex-col gap-3 items-start">
-            <h3 class="font-fancy font-semibold text-2xl">Pick a delivery date and Time</h3>
-            <input type="date" class="border outline-0 border-dark px-4 py-2 w-60" />
-            <input type="time" class="border outline-0 border-dark px-4 py-2 w-60" />
-            <p class="text-text">
-              Pick delivery date and time as you choose. Delivery Time takes place between 12PM -
-              4PM MON-FRI AND 8AM-11AM SAT.
-            </p>
-
-            <h2 class="font-fancy font-semibold text-2xl mt-3">Get shipping estimates</h2>
-
-            <select class="border border-dark px-4 py-2 w-60">
-              <option value="" disabled selected>Select Country</option>
-              <option value="usa">United States</option>
-              <option value="canada">Canada</option>
-              <option value="uk">United Kingdom</option>
-            </select>
-
-            <input
-              type="text"
-              class="border border-dark outline-0 px-4 py-2 w-50"
-              name="zipCode"
-              id="zipCode"
-              placeholder="Enter ZIP Code"
-            />
-
-            <button class="bg-dark text-white px-6 py-2 mt-3 float-right hover:bg-black/70">
-              CALCULATE SHIPPING
-            </button>
-          </div>
-
-          <div class="flex flex-col px-10 py-5 gap-3 w-full bg-[#f7f7f7]">
-            <h2 class="text-center text-3xl">Cart Totals</h2>
-
-            <div
-              class="grid grid-cols-2 w-full justify-between text-center [&_div]:border items-center px-2 [&_div]:border-black/10"
-            >
-              <div>
-                <p class="border-r border-r-black/10 text-lg">Subtotal:</p>
-                <p class="border-r border-r-black/10 text-lg">Total:</p>
-              </div>
-              <div>
-                <p class="text-xl">${{ store.cartTotal.toFixed(2) }}</p>
-                <p class="text-xl">${{ store.cartTotal.toFixed(2) }}</p>
-              </div>
+        <div class="flex flex-col lg:flex-row gap-12 items-start">
+          
+          <div class="w-full lg:w-1/2 flex flex-col gap-5">
+            <div class="space-y-4">
+               <h3 class="font-fancy font-semibold text-2xl">Delivery Details</h3>
+               <div class="grid grid-cols-1 sm:grid-cols-2 gap-4">
+                  <div class="flex flex-col gap-2">
+                    <label class="text-xs uppercase tracking-wider text-text">Date</label>
+                    <input type="date" class="border border-gray-300 rounded px-4 py-2 w-full outline-dark" />
+                  </div>
+                  <div class="flex flex-col gap-2">
+                    <label class="text-xs uppercase tracking-wider text-text">Time</label>
+                    <input type="time" class="border border-gray-300 rounded px-4 py-2 w-full outline-dark" />
+                  </div>
+               </div>
+               <p class="text-text text-sm italic">
+                Mon-Fri: 12PM - 4PM | Sat: 8AM - 11AM
+              </p>
             </div>
 
-            <span class="flex gap-3 items-center">
-              <input v-model="isAgreed" type="checkbox" name="terms" id="terms" />
-              <p class="text-text">I agree with the terms and conditions</p>
-            </span>
+            <div class="space-y-4 pt-4">
+              <h2 class="font-fancy font-semibold text-2xl">Shipping estimates</h2>
+              <select class="border border-gray-300 rounded px-4 py-3 w-full outline-dark">
+                <option value="" disabled selected>Select Country</option>
+                <option value="usa">United States</option>
+                <option value="canada">Canada</option>
+              </select>
+              <div class="flex gap-4">
+                <input type="text" placeholder="ZIP Code" class="border border-gray-300 rounded px-4 py-3 w-full outline-dark" />
+                <button class="bg-dark text-white px-6 py-3 whitespace-nowrap hover:bg-black/80 transition-colors">
+                  CALCULATE
+                </button>
+              </div>
+            </div>
+          </div>
+
+          <div class="w-full lg:w-1/2 bg-[#f7f7f7] p-6 md:p-10 rounded-lg flex flex-col gap-6">
+            <h2 class="text-2xl font-semibold border-b pb-4">Cart Totals</h2>
+
+            <div class="space-y-4">
+               <div class="flex justify-between items-center text-lg">
+                  <span>Subtotal</span>
+                  <span class="font-semibold">${{ store.cartTotal.toFixed(2) }}</span>
+               </div>
+               <div class="flex justify-between items-center text-xl font-bold text-dark border-t pt-4">
+                  <span>Total</span>
+                  <span>${{ store.cartTotal.toFixed(2) }}</span>
+               </div>
+            </div>
+
+            <div class="flex items-start gap-3 mt-4">
+              <input v-model="isAgreed" type="checkbox" id="terms" class="mt-1 w-4 h-4 rounded border-gray-300 text-dark focus:ring-dark" />
+              <label for="terms" class="text-sm text-text cursor-pointer">
+                I agree with the terms and conditions
+              </label>
+            </div>
 
             <button
               :disabled="!isAgreed"
               :class="[
-                !isAgreed ? 'opacity-50 cursor-not-allowed' : 'cursor-pointer',
-                'w-full p-3 cursor-hover text-center text-dark hover:text-text bg-[#f4e4a3]',
+                !isAgreed ? 'opacity-50 grayscale cursor-not-allowed' : 'hover:bg-dark hover:text-white',
+                'w-full py-4 text-center font-bold text-dark bg-[#f4e4a3] transition-all duration-300',
               ]"
             >
-              BUY IT NOW
+              PROCEED TO CHECKOUT
             </button>
           </div>
+
         </div>
-      </div>
-
-      <div class="flex flex-col my-15 gap-4">
-        <h2 class="text-3xl mb-6 text-center">You can also buy</h2>
-
-        <!-- <div class="w-full flex px-20">
-            <div v-for="(cat, index) in categories" :key="index" class="flex overflow-auto gap-10 ">
-            <div class="flex flex-col items-center gap-2">
-                <Icon :icon="cat.icon" width="40" class="text-4xl w-80 h-70 mx-3 bg-gray-300 "/>
-                <div class="flex items-center">
-                  <p class="text-xl font-medium">{{ cat.name }}</p>
-                </div>
-            </div>
-            </div>
-        </div> -->
       </div>
     </section>
   </div>

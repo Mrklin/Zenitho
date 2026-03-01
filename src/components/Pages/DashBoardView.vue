@@ -124,15 +124,11 @@ const activeType = ref(0)
 
 watch(activeType, async (newVal) => {
   const category = productType[newVal];
-//   if (!store.productByCat[category].length) {
-//     await store.fetchProducts(category);
-//     }
     await store.fetchProducts(1, 6, category);
 });
 
 const displayedProducts = computed(() => {
   const current = productType[activeType.value];
-
   return store.productByCat[current].slice(0, 6);
 });
 
@@ -143,7 +139,6 @@ const extraLinks = [
 ];
 
 onMounted(async () => {
-    
     await store.fetchProducts(1, 6, 'New');
 });
 
